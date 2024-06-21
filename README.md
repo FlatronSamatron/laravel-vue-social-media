@@ -14,3 +14,14 @@
 - `./vendor/bin/sail bash` -> use bash by sail
 - `npm run dev`
 
+## Generate Models and Migrations
+
+- `php artisan make:model Post -m` -> generate model and migration of Posts
+- `php artisan make:model PostAttachment -m` -> generate model and migration of PostAttachments
+- `php artisan make:model PostReaction -m` -> generate model and migration of PostReactions
+- `php artisan make:model Comment -m` -> generate model and migration of Comments
+- `php artisan make:model GroupUser -m` -> generate model and migration of GroupUsers
+- `php artisan make:model Follower -m` -> generate model and migration of Followers
+- `php artisan make:migration add_columns_to_users_table` -> add_columns_to_users_table
+- `php artisan migrate` -> crate tables
+
