@@ -25,3 +25,16 @@
 - `php artisan make:migration add_columns_to_users_table` -> add_columns_to_users_table
 - `php artisan migrate` -> crate tables
 
+## Generate Unique Username on Registration
+
+- `composer require spatie/laravel-sluggable` ->  [Generate slugs when saving Eloquent models](https://github.com/spatie/laravel-sluggable)
+- add to User model:
+  - implements MustVerifyEmail
+  - getSlugOptions()
+- `localhost:8025` -> mailpit - email verify service  
+- add to UpdateProfileInformationForm.vue username field
+- add to ProfileUpdateRequest.php username field
+  - add messages which react to regex
+
+
+
