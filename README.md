@@ -36,5 +36,10 @@
 - add to ProfileUpdateRequest.php username field
   - add messages which react to regex
 
+## Create Home Page UI with Tailwind.css
+
+- `php artisan make:controller HomeController` -> generate controller HomeController
+
+
 
 
