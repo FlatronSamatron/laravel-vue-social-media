@@ -39,6 +39,7 @@
 ## Create Home Page UI with Tailwind.css
 
 - `php artisan make:controller HomeController` -> generate controller HomeController
+- clean unnecessary routes and views
 
 
 
