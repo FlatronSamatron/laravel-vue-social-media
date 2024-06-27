@@ -41,6 +41,15 @@
 - `php artisan make:controller HomeController` -> generate controller HomeController
 - clean unnecessary routes and views
 
+## User Cover & Avatar Image Upload
+- `php artisan make:resource UserResource` -> generate resource UserResource
+- `npm i @heroicons/vue` -> install package with icons
+- to AppServiceProvider.php add JsonResource::withoutWrapping() -> delete wrap data:{} from resources
+- `php artisan storage:link` -> The [public/storage] link has been connected to [storage/app/public]
+- `Storage::url($this->cover_path)` -> return correct link to storage
+- `Storage::disk('public')->delete($user->cover_path)` -> delete previous cover from public storage|disk
+
+
 
 
 
