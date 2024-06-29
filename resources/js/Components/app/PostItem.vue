@@ -4,7 +4,9 @@
     const {post} = defineProps({
         post: Object
     })
-    const {user: {id, avatar, name}, attachments, group, body, createAt} = post
+    const {user: {id, avatar_path, name}, attachments, group, body, created_at} = post
+
+    console.log(post)
 
     const isOpenRef = ref(false);
     const isLong = body.length > 100
@@ -29,7 +31,7 @@
   <div class="mb-5 bg-white border rounded p-4 shadow mb-3">
     <div class="flex items-center gap-2 mb-2">
       <a href="#">
-        <img :src="avatar" alt="image" class="w-[45px] rounded-full transition-all hover:scale-110">
+        <img :src="avatar_path" alt="image" class="w-[45px] rounded-full transition-all hover:scale-110">
       </a>
       <div>
         <h4 class="flex font-bold">
@@ -43,7 +45,7 @@
             </a>
           </span>
         </h4>
-        <small class="text-gray-400">{{createAt}}</small>
+        <small class="text-gray-400">{{created_at}}</small>
       </div>
     </div>
     <div v-html="bodyRef"></div>

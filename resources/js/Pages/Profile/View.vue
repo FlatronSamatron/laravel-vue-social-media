@@ -3,10 +3,9 @@
   import {ref} from "vue";
   import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
   import Edit from "@/Pages/Profile/Edit.vue";
-  import PrimaryButton from "@/Components/PrimaryButton.vue";
   import { useForm } from '@inertiajs/vue3'
 
-  import { XMarkIcon, CameraIcon, PencilIcon, CheckCircleIcon, PhotoIcon } from '@heroicons/vue/24/solid'
+  import { XMarkIcon, CameraIcon, CheckCircleIcon, PhotoIcon } from '@heroicons/vue/24/solid'
 
   const authUser = usePage().props.auth.user
 

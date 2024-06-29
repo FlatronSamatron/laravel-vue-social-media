@@ -49,6 +49,29 @@
 - `Storage::url($this->cover_path)` -> return correct link to storage
 - `Storage::disk('public')->delete($user->cover_path)` -> delete previous cover from public storage|disk
 
+## Implement Post Creation
+- `php artisan make:controller PostController --model=Post`
+- `php artisan make:request Post/UpdatePostRequest`
+- `php artisan make:request Post/StorePostRequest`
+- `php artisan make:resource PostResource`
+- added Relationships in PostModel:
+  - `function user(): BelongsTo
+    {
+    return $this->belongsTo(User::class);
+    }`
+  - `function group(): BelongsTo
+    {
+    return $this->belongsTo(Group::class);
+    }`
+  - `function attachments(): HasMany
+    {
+    return $this->hasMany(PostAttachment::class);
+    }`
+- returned posts from HomeController:
+  - `return Inertia::render('Home', [
+    'posts' => PostResource::collection($posts)
+    ]);`
+
 
 
 

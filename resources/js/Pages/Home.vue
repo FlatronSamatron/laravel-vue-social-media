@@ -6,7 +6,10 @@ import CreatePost from "@/Components/app/CreatePost.vue";
 import PostList from "@/Components/app/PostList.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 
-defineProps({});
+defineProps({
+  posts: Object
+})
+
 </script>
 
 <template>
@@ -21,7 +24,7 @@ defineProps({});
     </div>
     <div class="lg:col-span-6 lg:order-2">
       <CreatePost/>
-      <PostList/>
+      <PostList :posts="posts.data"/>
     </div>
   </div>
   </AuthenticatedLayout>
