@@ -72,6 +72,14 @@
     'posts' => PostResource::collection($posts)
     ]);`
 
+## Updating & Deleting of Posts
+in UpdatePostRequest.php authorized user can change only his posts :
+- `public function authorize(): bool
+  {
+  $post = Post::where('id', $this->input('id'))->where('user_id', auth()->id())->first();
+  return !!$post;
+  }` 
+
 
 
 

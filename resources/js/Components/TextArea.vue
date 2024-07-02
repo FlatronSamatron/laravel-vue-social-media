@@ -1,6 +1,6 @@
 <script setup>
 
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 
 const props = defineProps({
   placeholder: String,
@@ -13,12 +13,22 @@ const props = defineProps({
 const model = defineModel()
 const textarea = ref(null)
 
+const autoResize = () => {
+  textarea.value.style.height = 'auto'
+  textarea.value.style.height = textarea.value.scrollHeight + 'px'
+}
+
 const onInput = () => {
   if(props.autoresize){
-    textarea.value.style.height = 'auto'
-    textarea.value.style.height = textarea.value.scrollHeight + 'px'
+    autoResize()
   }
 }
+
+onMounted(()=>{
+  setTimeout(()=>{
+    autoResize()
+  }, 0)
+})
 
 </script>
 

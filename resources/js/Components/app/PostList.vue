@@ -5,6 +5,7 @@ defineProps({
   posts: Object
 })
 
+
 </script>
 
 <template>
