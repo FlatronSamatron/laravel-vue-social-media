@@ -16,3 +16,55 @@
     border-radius: 5px;
     background-color: #9CA3AF;
 }
+
+*::-webkit-file-upload-button { cursor:pointer; }
+
+input[type='file']{
+    cursor: pointer;
+}
+
+.ck-content > blockquote,
+.ck-content > dl,
+.ck-content > dd,
+.ck-content > h1,
+.ck-content > h2,
+.ck-content > h3,
+.ck-content > h4,
+.ck-content > h5,
+.ck-content > h6,
+.ck-content > hr,
+.ck-content > figure,
+.ck-content > p,
+.ck-content > pre {
+    margin: revert;
+}
+
+.ck-content > ol,
+.ck-content > ul {
+    list-style: revert;
+    margin: revert;
+    padding: revert;
+}
+
+.ck-content > table {
+    border-collapse: revert;
+}
+
+.ck-content > h1,
+.ck-content > h2,
+.ck-content > h3,
+.ck-content > h4,
+.ck-content > h5,
+.ck-content > h6 {
+    font-size: revert;
+    font-weight: revert;
+}
+
+.ck-content a {
+    text-decoration: underline;
+    color: #4b9afa;
+}
+
+.ck-powered-by{
+    display: none;
+}

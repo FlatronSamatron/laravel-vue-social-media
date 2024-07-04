@@ -80,6 +80,16 @@ in UpdatePostRequest.php authorized user can change only his posts :
   return !!$post;
   }` 
 
+## Add CKEditor During Post
+
+- [npm install @ckeditor/ckeditor5-vue, npm install ckeditor5](https://ckeditor.com/docs/ckeditor5/latest/getting-started/installation/vuejs-v3.html)
+
+## Uploading Attachments
+- `php artisan make:migration add_size_column_to_post_attachments_table`
+- `php artisan make:resource PostAttachmentResource`
+
+
+
 
 
 
