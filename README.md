@@ -76,8 +76,8 @@
 in UpdatePostRequest.php authorized user can change only his posts :
 - `public function authorize(): bool
   {
-  $post = Post::where('id', $this->input('id'))->where('user_id', auth()->id())->first();
-  return !!$post;
+  $post = $this->route('post');
+  return $post->user_id == auth()->id();
   }` 
 
 ## Add CKEditor During Post
@@ -87,6 +87,30 @@ in UpdatePostRequest.php authorized user can change only his posts :
 ## Uploading Attachments
 - `php artisan make:migration add_size_column_to_post_attachments_table`
 - `php artisan make:resource PostAttachmentResource`
+
+## Delete and download post attachments
+
+- PostModal.vue cannot update with form.put because it should update post and add new pictures:
+  - added in modal _method: ''
+  - form._method = 'PUT'
+    form.post(route('post.update', post)
+  
+- PostController.php deleting files from db:
+  - `$attachments = PostAttachment::query()
+    ->where('post_id', $post->id)
+    ->whereIn('id', $deletedIds)
+    ->get();`
+  - `foreach ($attachments as $attachment){
+        $attachment->delete();
+    }`
+
+- PostAttachment.php deleting from storage
+  - `protected static function boot()`
+    `{ parent::boot();
+        static::deleted(function (self $model) {
+            Storage::disk('public')->delete($model->path);
+        });
+    }`
 
 
 

@@ -5,15 +5,16 @@ import Modal from "@/Components/Modal.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import {DocumentIcon, XMarkIcon} from "@heroicons/vue/24/outline";
+import PostUserHeader from "@/Components/app/PostUserHeader.vue";
+import AttachmentItems from "@/Components/app/AttachmentItems.vue";
 
 const props = defineProps({
   isModalOpen: Boolean,
-  isCreatePost: {
-    default: false,
-    type: Boolean
-  }
+  post: Object
 })
+
+
+const {post, isModalOpen} = props
 
 const emit = defineEmits(['closeModal'])
 
@@ -24,31 +25,41 @@ const editorConfig = {
   ],
 }
 
-const isModalOpen = ref(false)
+const postAttachments = post?.attachments || []
+
 const attachmentFiles = ref([]);
+const computedAttachments = computed(() => {
+  return [...attachmentFiles.value, ...postAttachments]
+});
 
 const form = useForm({
-  body: '',
-  attachments: []
+  id: post && post.id,
+  body: post?.body || '',
+  attachments: [],
+  deleted_file_ids: [],
+  _method: ''
 })
+
 
 const submit = () => {
   form.attachments = attachmentFiles.value.map( f => f.file)
 
-  if(!form.body.length){
-    isModalOpen.value = false
-    return
-  }
-
-  if(props.isCreatePost){
+  if(!post){
     form.post(route('post.create'), {
       onSuccess: () => {
-        form.reset()
-        emit('closeModal')
+        closeModal()
+      }
+    })
+  } else {
+    form._method = 'PUT'
+    form.post(route('post.update', post), {
+      onSuccess: () => {
+        closeModal()
       }
     })
   }
 
+  closeModal()
 }
 
 const isImage = (type) => {
@@ -56,7 +67,17 @@ const isImage = (type) => {
 }
 
 const removeFile = (attach) => {
-  attachmentFiles.value = attachmentFiles.value.filter(f => f !== attach)
+  if(attach.file){
+    attachmentFiles.value = attachmentFiles.value.filter(f => f !== attach)
+  } else{
+    form.deleted_file_ids.push(attach.id)
+    attach.deleted = true
+  }
+}
+
+const removeFromDeleted = (file) => {
+  file.deleted = false
+  form.deleted_file_ids = form.deleted_file_ids.filter(f=> f !== file.id)
 }
 
 const onAttachmentChoose = async (e) => {
@@ -64,6 +85,9 @@ const onAttachmentChoose = async (e) => {
   for(const file of files){
     const myFile = {
       file,
+      name: file.name,
+      mime: file.type,
+      size: file.size,
       url: await readFile(file)
     }
     attachmentFiles.value.push(myFile)
@@ -85,32 +109,27 @@ const readFile = async (file) => {
     }
   })
 }
+
+const closeModal = () => {
+  form.reset()
+  emit('closeModal')
+  postAttachments.forEach(f => f.deleted = false)
+}
+
 </script>
 
 <template>
-  <Modal :show="props.isModalOpen" @close="emit('closeModal')">
+  <Modal :show="isModalOpen" @close="closeModal">
     <div class="p-6">
       <h2 class="text-lg font-medium text-gray-900">
-        Create Post
+        {{ !!post ? 'Update Post' : 'Create Post' }}
       </h2>
 
       <div class="mt-6">
         <ckeditor :editor="editor" v-model="form.body" :config="editorConfig"></ckeditor>
       </div>
 
-      <div class="grid gap-3 mt-3 mb-3" :class="[
-        attachmentFiles.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
-      ]">
-        <div v-for="attachment of attachmentFiles" class="relative group bg-blue-100 flex justify-center">
-          <XMarkIcon class="size-6 absolute top-2 right-2 cursor-pointer opacity-0 group-hover:opacity-100 transition-all hover:scale-110" @click="removeFile(attachment)"/>
-          <img class="object-contain" v-if="isImage(attachment.file.type)" :src="attachment.url" alt="">
-          <div v-else class="aspect-square bg-blue-100 flex flex-col items-center justify-center text-gray-500" >
-            <DocumentIcon class="size-16"/>
-
-            <small class="text-center">{{ attachment.file.name }}</small>
-          </div>
-        </div>
-      </div>
+      <AttachmentItems :attachment-files="computedAttachments" @remove-file="removeFile" @remove-from-deleted="removeFromDeleted"/>
 
       <div class="mt-6 flex justify-between">
         <SecondaryButton @click="isModalOpen=false"> Cancel</SecondaryButton>
@@ -127,7 +146,7 @@ const readFile = async (file) => {
               class="ms-3"
               @click="submit"
           >
-            Create Post
+            Submit
           </PrimaryButton>
         </div>
       </div>
