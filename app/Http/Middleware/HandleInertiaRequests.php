@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Requests\Post\StorePostRequest;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
@@ -35,10 +36,11 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-//            'ziggy' => fn () => [
-//                    ...(new Ziggy)->toArray(),
-//                'location' => $request->url()
-//            ]
+            'attachmentsExtensions' => StorePostRequest::$extensions,
+            'ziggy' => fn () => [
+                    ...(new Ziggy)->toArray(),
+                'location' => $request->url()
+            ]
         ];
     }
 }

@@ -1,11 +1,10 @@
 <script setup>
 import {computed, ref} from "vue";
-import {useForm} from "@inertiajs/vue3";
+import {useForm, usePage} from "@inertiajs/vue3";
 import Modal from "@/Components/Modal.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import PostUserHeader from "@/Components/app/PostUserHeader.vue";
 import AttachmentItems from "@/Components/app/AttachmentItems.vue";
 
 const props = defineProps({
@@ -13,10 +12,13 @@ const props = defineProps({
   post: Object
 })
 
+const attachmentsExtensions = usePage().props.attachmentsExtensions
+
 
 const {post, isModalOpen} = props
 
 const emit = defineEmits(['closeModal'])
+const postErrors = ref([])
 
 const editor = ClassicEditor
 const editorConfig = {
@@ -40,26 +42,33 @@ const form = useForm({
   _method: ''
 })
 
+const getErrorsValues = (e) => {
+  for(let key in e){
+    const [_, index] = key.split('.')
+    postErrors.value[index] = e[key]
+  }
+}
 
 const submit = () => {
   form.attachments = attachmentFiles.value.map( f => f.file)
+  postErrors.value = []
 
   if(!post){
     form.post(route('post.create'), {
       onSuccess: () => {
         closeModal()
-      }
+      },
+      onError: (e) => getErrorsValues(e)
     })
   } else {
     form._method = 'PUT'
     form.post(route('post.update', post), {
       onSuccess: () => {
         closeModal()
-      }
+      },
+      onError: (e) => getErrorsValues(e)
     })
   }
-
-  closeModal()
 }
 
 const isImage = (type) => {
@@ -82,6 +91,7 @@ const removeFromDeleted = (file) => {
 
 const onAttachmentChoose = async (e) => {
   const files = e.target.files
+
   for(const file of files){
     const myFile = {
       file,
@@ -124,12 +134,21 @@ const closeModal = () => {
       <h2 class="text-lg font-medium text-gray-900">
         {{ !!post ? 'Update Post' : 'Create Post' }}
       </h2>
-
       <div class="mt-6">
         <ckeditor :editor="editor" v-model="form.body" :config="editorConfig"></ckeditor>
       </div>
 
-      <AttachmentItems :attachment-files="computedAttachments" @remove-file="removeFile" @remove-from-deleted="removeFromDeleted"/>
+      <div v-if="postErrors.length" class="border-l-4 border-amber-500 py-2 px-3 bg-amber-100 mt-3 text-gray-800">
+        Files must be one of the following extensions:
+        {{attachmentsExtensions.join(', ')}}
+      </div>
+
+      <AttachmentItems
+          :attachment-files="computedAttachments"
+          @remove-file="removeFile"
+          @remove-from-deleted="removeFromDeleted"
+          :post-errors="postErrors"
+      />
 
       <div class="mt-6 flex justify-between">
         <SecondaryButton @click="isModalOpen=false"> Cancel</SecondaryButton>
