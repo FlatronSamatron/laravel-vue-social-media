@@ -19,6 +19,7 @@ const {post, isModalOpen} = props
 
 const emit = defineEmits(['closeModal'])
 const postErrors = ref([])
+const errors = ref([])
 
 const editor = ClassicEditor
 const editorConfig = {
@@ -43,9 +44,12 @@ const form = useForm({
 })
 
 const getErrorsValues = (e) => {
+  errors.value = e
   for(let key in e){
-    const [_, index] = key.split('.')
-    postErrors.value[index] = e[key]
+    if(key.includes('.')){
+      const [_, index] = key.split('.')
+      postErrors.value[index] = e[key]
+    }
   }
 }
 
@@ -141,6 +145,10 @@ const closeModal = () => {
       <div v-if="postErrors.length" class="border-l-4 border-amber-500 py-2 px-3 bg-amber-100 mt-3 text-gray-800">
         Files must be one of the following extensions:
         {{attachmentsExtensions.join(', ')}}
+      </div>
+
+      <div v-if="errors.attachments" class="border-l-4 border-red-500 py-2 px-3 bg-red-100 mt-3 text-gray-800">
+        {{errors.attachments}}
       </div>
 
       <AttachmentItems
