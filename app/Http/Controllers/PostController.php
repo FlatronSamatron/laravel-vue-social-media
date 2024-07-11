@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Enums\PostReactionEnum;
 use App\Http\Requests\Post\StorePostRequest;
 use App\Http\Requests\Post\UpdatePostRequest;
 use App\Models\Post;
 use App\Models\PostAttachment;
+use App\Models\PostReaction;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class PostController extends Controller
 {
@@ -25,7 +29,7 @@ class PostController extends Controller
         /** @var UploadedFile[] $files */
         $files = $data['attachments'] ?? [];
 
-        $postData = array_filter($data, function($k) {
+        $postData = array_filter($data, function ($k) {
             return $k !== 'attachments';
         }, ARRAY_FILTER_USE_KEY);
 
@@ -34,16 +38,16 @@ class PostController extends Controller
         try {
             $post = Post::create($postData);
 
-            foreach ($files as $file){
-                $path = $file->store('attachments/'.$post->id, 'public');
+            foreach ($files as $file) {
+                $path          = $file->store('attachments/'.$post->id, 'public');
                 $allFilePath[] = $path;
                 PostAttachment::create([
-                        'post_id' => $post->id,
-                        'name' => $file->getClientOriginalName(),
-                        'path' => $path,
-                        'mime' => $file->getMimeType(),
-                        'size' => $file->getSize(),
-                        'created_by' => $user->id
+                        'post_id'    => $post->id,
+                        'name'       => $file->getClientOriginalName(),
+                        'path'       => $path,
+                        'mime'       => $file->getMimeType(),
+                        'size'       => $file->getSize(),
+                        'created_by' => $user->id,
                 ]);
             }
 
@@ -66,13 +70,13 @@ class PostController extends Controller
      */
     public function update(UpdatePostRequest $request, Post $post)
     {
-        $user = $request->user();
-        $data = $request->validated();
-        $postData = array_filter($data, function($k) {
+        $user        = $request->user();
+        $data        = $request->validated();
+        $postData    = array_filter($data, function ($k) {
             return $k !== 'attachments' && $k !== 'deleted_file_ids';
         }, ARRAY_FILTER_USE_KEY);
         $allFilePath = [];
-        $deletedIds = $data['deleted_file_ids'];
+        $deletedIds  = $data['deleted_file_ids'];
         /** @var UploadedFile[] $files */
         $files = $data['attachments'] ?? [];
 
@@ -85,20 +89,20 @@ class PostController extends Controller
                     ->whereIn('id', $deletedIds)
                     ->get();
 
-            foreach ($attachments as $attachment){
+            foreach ($attachments as $attachment) {
                 $attachment->delete();
             }
 
-            foreach ($files as $file){
-                $path = $file->store('attachments/'.$post->id, 'public');
+            foreach ($files as $file) {
+                $path          = $file->store('attachments/'.$post->id, 'public');
                 $allFilePath[] = $path;
                 PostAttachment::create([
-                        'post_id' => $post->id,
-                        'name' => $file->getClientOriginalName(),
-                        'path' => $path,
-                        'mime' => $file->getMimeType(),
-                        'size' => $file->getSize(),
-                        'created_by' => $user->id
+                        'post_id'    => $post->id,
+                        'name'       => $file->getClientOriginalName(),
+                        'path'       => $path,
+                        'mime'       => $file->getMimeType(),
+                        'size'       => $file->getSize(),
+                        'created_by' => $user->id,
                 ]);
             }
 
@@ -120,7 +124,7 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         $id = Auth::id();
-        if($post->user_id !== $id){
+        if ($post->user_id !== $id) {
             return response("ypu don't have permission to delete this post", 403);
         }
 
@@ -132,5 +136,37 @@ class PostController extends Controller
     public function download(PostAttachment $attachment)
     {
         return response()->download(Storage::disk('public')->path($attachment->path), $attachment->name);
+    }
+
+    public function postReaction(Request $request, Post $post)
+    {
+        $data = $request->validate([
+                'reaction' => [Rule::enum(PostReactionEnum::class)],
+        ]);
+
+        $userId = Auth::id();
+
+        $reaction = PostReaction::where('user_id', $userId)->where('post_id', $post->id)->first();
+
+        if($reaction){
+            $hasReaction = false;
+            $reaction->delete();
+        } else {
+            $hasReaction = true;
+            PostReaction::create([
+                    'post_id' => $post->id,
+                    'user_id' => $userId,
+                    'type'    => $data['reaction'],
+            ]);
+        }
+
+
+
+        $reactions = PostReaction::where('post_id', $post->id)->count();
+
+        return response([
+                'num_of_reactions' => $reactions,
+            'current_user_has_reaction' => $hasReaction
+        ]);
     }
 }

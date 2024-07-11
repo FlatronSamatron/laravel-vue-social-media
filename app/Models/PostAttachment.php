@@ -10,7 +10,7 @@ class PostAttachment extends Model
 {
     use HasFactory;
 
-    CONST UPDATED_AT = null;
+    const UPDATED_AT = null;
 
     protected $guarded = false;
 

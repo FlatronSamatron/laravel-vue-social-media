@@ -112,6 +112,14 @@ in UpdatePostRequest.php authorized user can change only his posts :
         });
     }`
 
+## Implement Reactions on Posts
+  
+- `npm i -S axios`
+- created axiosClient.js and use [Interceptors](https://axios-http.com/docs/interceptors)
+- withCount('reactions') - reactions_count
+- added enum PostReactionEnum to validate request
+
+
 
 
 

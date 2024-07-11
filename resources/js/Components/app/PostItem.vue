@@ -16,21 +16,45 @@ import {router} from "@inertiajs/vue3";
 import TrimText from "@/Components/app/TrimText.vue";
 import PostModal from "@/Components/app/PostModal.vue";
 import AttachmentItems from "@/Components/app/AttachmentItems.vue";
+import axiosClient from "@/axiosClient.js";
 
 const {post} = defineProps({
   post: Object
 })
 
-const {user: {id: userId, avatar_path, name}, attachments, group, body, created_at, id: postId} = post
+const {
+  user: {id: userId, avatar_path, name},
+  attachments,
+  group,
+  body,
+  created_at,
+  id: postId,
+  num_of_reactions,
+  current_user_has_reaction
+} = post
 
 const isUpdateModalOpen = ref(false)
 const isDeleteModalOpen = ref(false)
+
+const likeData = ref({
+  num_of_reactions,
+  current_user_has_reaction
+})
 
 const deletePost = () => {
   router.delete(route('post.destroy', post), {
     onSuccess: () => {
       isDeleteModalOpen.value = false
     }
+  })
+}
+
+const sendReaction = () => {
+  axiosClient.post(route('post.reaction', post), {
+    reaction: 'like'
+  }).then(({data})=>{
+    likeData.value.num_of_reactions = data.num_of_reactions
+    likeData.value.current_user_has_reaction = data.current_user_has_reaction
   })
 }
 </script>
@@ -61,7 +85,8 @@ const deletePost = () => {
           </template>
         </Dropdown>
 
-        <PostModal v-if="isUpdateModalOpen" :isModalOpen="isUpdateModalOpen" @closeModal="isUpdateModalOpen=false" :post="post"/>
+        <PostModal v-if="isUpdateModalOpen" :isModalOpen="isUpdateModalOpen" @closeModal="isUpdateModalOpen=false"
+                   :post="post"/>
 
         <Modal :show="isDeleteModalOpen" @close="isDeleteModalOpen=false">
           <div class="p-6">
@@ -95,9 +120,15 @@ const deletePost = () => {
 
     <div class="flex gap-2 text-gray-800">
       <button
-          class="flex gap-1 flex-1 items-center justify-center bg-gray-100 hover:bg-gray-200 transition-all rounded-lg py-3">
+          @click="sendReaction"
+          class="flex gap-1 flex-1 items-center justify-center transition-all rounded-lg py-3"
+          :class="likeData.current_user_has_reaction ? 'bg-blue-100 hover:bg-blue-200' : 'bg-gray-100 hover:bg-gray-200'"
+      >
         <HandThumbUpIcon class="size-6"/>
-        Like
+        <span class="mr-1">
+          {{ likeData.num_of_reactions }}
+        </span>
+        {{ likeData.current_user_has_reaction ? 'Unlike' : 'Like' }}
       </button>
       <button
           class="flex gap-1 flex-1 items-center justify-center bg-gray-100 hover:bg-gray-200 transition-all rounded-lg py-3">
