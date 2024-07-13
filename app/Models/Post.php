@@ -34,4 +34,14 @@ class Post extends Model
     {
         return $this->hasMany(PostReaction::class);
     }
+
+    function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    function latestComments(): HasMany
+    {
+        return $this->hasMany(Comment::class)->latest();
+    }
 }

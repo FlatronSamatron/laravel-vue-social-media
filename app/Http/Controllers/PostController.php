@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Enums\PostReactionEnum;
 use App\Http\Requests\Post\StorePostRequest;
+use App\Http\Requests\Post\UpdateCommentRequest;
 use App\Http\Requests\Post\UpdatePostRequest;
+use App\Http\Resources\CommentResource;
+use App\Models\Comment;
 use App\Models\Post;
 use App\Models\PostAttachment;
 use App\Models\PostReaction;
@@ -148,7 +151,7 @@ class PostController extends Controller
 
         $reaction = PostReaction::where('user_id', $userId)->where('post_id', $post->id)->first();
 
-        if($reaction){
+        if ($reaction) {
             $hasReaction = false;
             $reaction->delete();
         } else {
@@ -161,12 +164,48 @@ class PostController extends Controller
         }
 
 
-
         $reactions = PostReaction::where('post_id', $post->id)->count();
 
         return response([
-                'num_of_reactions' => $reactions,
-            'current_user_has_reaction' => $hasReaction
+                'num_of_reactions'          => $reactions,
+                'current_user_has_reaction' => $hasReaction,
         ]);
+    }
+
+    public function createComment(Request $request, Post $post)
+    {
+        $data = $request->validate([
+                'comment' => ['required'],
+        ]);
+
+        $comment = Comment::create([
+                'post_id' => $post->id,
+                'comment' => $data['comment'],
+                'user_id' => Auth::id(),
+        ]);
+
+        return response(new CommentResource($comment), 201);
+    }
+
+    public function deleteComment(Comment $comment)
+    {
+        if ($comment->user_id !== Auth::id()) {
+            return response('You don\'t have permission to delete this comment', 403);
+        }
+
+        $comment->delete();
+
+        return response('', 204);
+    }
+
+    public function updateComment(UpdateCommentRequest $request, Comment $comment)
+    {
+        $data = $request->validated();
+
+        $comment->update([
+                'comment' => $data['comment'],
+        ]);
+
+        return new CommentResource($comment);
     }
 }
