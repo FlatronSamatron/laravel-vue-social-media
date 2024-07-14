@@ -4,7 +4,8 @@ import Dropdown from "@/Components/Dropdown.vue";
 import {
   EllipsisHorizontalIcon,
   HandThumbUpIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  ChatBubbleLeftEllipsisIcon
 } from '@heroicons/vue/24/outline'
 import Modal from "@/Components/Modal.vue";
 import DangerButton from "@/Components/DangerButton.vue";
@@ -66,7 +67,7 @@ const sendReaction = () => {
 }
 
 const createComment = () => {
-  axiosClient.post(route('post.comment.create', post), {
+  axiosClient.post(route('comment.create', post), {
     comment: newComment.value
   }).then(({data}) => {
     newComment.value = ''
@@ -75,21 +76,29 @@ const createComment = () => {
 }
 
 const deleteComment = (comment) => {
-  axiosClient.delete(route('post.comment.delete', comment.id)).then(({data}) => {
+  axiosClient.delete(route('comment.delete', comment.id)).then(({data}) => {
     const commentIndex = comments.findIndex(c => comment.id === c.id)
     comments.splice(commentIndex, 1)
   })
 }
 
 const editCommentHandler = () => {
-  console.log(editComment.value)
   const {id, comment} = editComment.value
-  axiosClient.put(route('post.comment.update', id), {
+  axiosClient.put(route('comment.update', id), {
     comment: comment
   }).then(({data}) => {
     const commentIndex = comments.findIndex(c => id === c.id)
     comments[commentIndex].comment = data.comment
     editComment.value = {}
+  })
+}
+
+const sendCommentReaction = (comment) => {
+  axiosClient.post(route('comment.reaction', comment.id), {
+    reaction: 'like'
+  }).then(({data}) => {
+    comment.num_of_reactions = data.num_of_reactions
+    comment.current_user_has_reaction = data.current_user_has_reaction
   })
 }
 
@@ -226,11 +235,27 @@ const editCommentHandler = () => {
               <div v-else class="pt-4">
                 {{ comment.comment }}
               </div>
+              <div class="flex gap-3 mt-2">
+                <button
+                    @click="sendCommentReaction(comment)"
+                    class="flex items-center cursor-pointer text-indigo-500 hover:bg-indigo-100 rounded py-0.5 px-1 border border-indigo-100 transition-all"
+                    :class="comment.current_user_has_reaction ? 'bg-indigo-100 hover:bg-indigo-200' : 'bg-transparent'">
+                  <HandThumbUpIcon class="size-4"/>
+                  <span class="mr-2 ml-1">{{ comment.num_of_reactions }}</span>
+                  {{ comment.current_user_has_reaction ? 'Unlike' : 'Like' }}
+                </button>
+                <button
+                    class="flex items-center cursor-pointer text-indigo-500 hover:bg-indigo-100 rounded py-0.5 px-1 border border-indigo-100 transition-all">
+                  <ChatBubbleLeftEllipsisIcon class="size-4 mr-2"/>
+                  Reply
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </Transition>
+
   </div>
 </template>
 

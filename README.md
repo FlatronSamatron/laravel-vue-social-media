@@ -134,6 +134,11 @@ in UpdatePostRequest.php authorized user can change only his posts :
   return $comment->user_id == auth()->id();
   }`
 
+## Comment like/unlike
+
+- `artisan make:migration change_post_reactions_table`
+
+
 
 
 
